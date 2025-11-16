@@ -1,7 +1,11 @@
-<table align="center">
-  <tr>
-    <td><img src="assets/logo.png" alt="QuantX Logo" width="60"></td>
-    <td><h1>QuantX-Algorithm 🚀</h1></td>
+<table align="center" style="border-collapse: collapse; border: none;">
+  <tr style="border: none;">
+    <td style="border: none; padding: 0;">
+      <img src="assets/logo.png" alt="QuantX Logo" width="60">
+    </td>
+    <td style="border: none; padding: 0 10px;">
+      <h1 style="margin: 0;">QuantX-Algorithm 🚀</h1>
+    </td>
   </tr>
 </table>
 
