@@ -1,5 +1,9 @@
 
-# ![QuantX Logo](assets/Gemini_Generated_Image_jo8xy9jo8xy9jo8x.png?text=QuantX+Logo) QuantX-Algorithm 🚀
+<h1 align="center">
+  <img src="assets/logo.png" alt="QuantX Logo" width="50" style="vertical-align: middle;"/>
+  QuantX-Algorithm 🚀
+</h1>
+
 
 [![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python\&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
