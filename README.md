@@ -1,8 +1,10 @@
+<table align="center">
+  <tr>
+    <td><img src="assets/logo.png" alt="QuantX Logo" width="60"></td>
+    <td><h1>QuantX-Algorithm 🚀</h1></td>
+  </tr>
+</table>
 
-<h1 align="center">
-  <img src="assets/logo.png" alt="QuantX Logo" width="50" style="vertical-align: middle;"/>
-  QuantX-Algorithm 🚀
-</h1>
 
 
 [![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python\&logoColor=white)](https://www.python.org/)
