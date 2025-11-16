@@ -1,5 +1,5 @@
 
-# ![QuantX Logo](https://via.placeholder.com/100x50.png?text=QuantX+Logo) QuantX-Algorithm 🚀
+# ![QuantX Logo](assets/Gemini_Generated_Image_jo8xy9jo8xy9jo8x.png?text=QuantX+Logo) QuantX-Algorithm 🚀
 
 [![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python\&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
