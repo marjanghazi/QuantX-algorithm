@@ -1,6 +1,6 @@
 
 <h1 align="center">
-  <img src="assets/logo.png" alt="QuantX Logo" width="50" style="vertical-align: middle;"/>
+  <img src="assets/logo.jpeg" alt="QuantX Logo" width="50" style="vertical-align: middle;"/>
   QuantX-Algorithm 🚀
 </h1>
 
