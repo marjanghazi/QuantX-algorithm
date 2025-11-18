@@ -2,33 +2,98 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>BB84 Visualization</title>
+  <title>BB84 Visualization Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #summary { margin-bottom: 20px; }
-    .explanation { margin-top: 20px; background: #f9f9f9; padding: 15px; border-radius: 5px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
-    th { background-color: #eee; }
-    .alice { color: blue; font-weight: bold; }
-    .bob { color: green; font-weight: bold; }
-    .error { color: orange; font-weight: bold; }
-    .sifted { background-color: #d1ffd1; font-weight: bold; } /* highlight sifted key bits */
-    .rejected { background-color: #ffd1d1; font-style: italic; } /* rejected bits */
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      margin: 20px; 
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    h2 { text-align: center; color: #2c3e50; }
+    
+    /* Summary Cards */
+    .summary-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      justify-content: center;
+    }
+    .summary-card {
+      flex: 1 1 200px;
+      background-color: #fff;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .summary-card h3 { margin: 0 0 10px; font-size: 18px; color: #2980b9; }
+    .summary-card p { font-size: 16px; font-weight: bold; }
+
+    /* Explanation Card */
+    .explanation {
+      margin-top: 20px; 
+      background: #ffffff; 
+      padding: 20px; 
+      border-radius: 10px; 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      line-height: 1.6;
+    }
+
+    /* Chart Card */
+    #chartCard {
+      margin-top: 30px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Table Styles */
+    h3 { margin-top: 40px; text-align: center; color: #2c3e50; }
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      margin-top: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    th, td { 
+      border-bottom: 1px solid #ddd; 
+      padding: 10px; 
+      text-align: center;
+    }
+    th { background-color: #2980b9; color: #fff; }
+    tr:hover { background-color: #f1f1f1; }
+    
+    .alice { color: #3498db; font-weight: bold; }
+    .bob { color: #27ae60; font-weight: bold; }
+    .error { color: #e67e22; font-weight: bold; }
+    .sifted { background-color: #d1ffd1; font-weight: bold; }
+    .rejected { background-color: #ffd1d1; font-style: italic; }
+
+    @media(max-width: 768px){
+      .summary-container { flex-direction: column; }
+    }
   </style>
 </head>
 <body>
-  <h2>BB84 Quantum Key Distribution Visualization</h2>
-  
-  <!-- Summary -->
-  <p id="summary"></p>
-  
-  <!-- Chart -->
-  <canvas id="bb84Chart" width="900" height="400"></canvas>
-  
+  <h2>BB84 Quantum Key Distribution Dashboard</h2>
+
+  <!-- Summary Cards -->
+  <div class="summary-container" id="summaryCards"></div>
+
   <!-- Explanation -->
   <div class="explanation" id="explanation"></div>
+
+  <!-- Chart Card -->
+  <div id="chartCard">
+    <canvas id="bb84Chart" width="900" height="400"></canvas>
+  </div>
 
   <!-- Table -->
   <h3>Bits Table</h3>
@@ -50,14 +115,21 @@
       .then(res => res.json())
       .then(data => {
 
-        // Summary
-        const summary = `
-          <strong>Total bits generated:</strong> ${data.total_bits} <br>
-          <strong>Sifted key length:</strong> ${data.sifted_key_length} <br>
-          <strong>QBER (Quantum Bit Error Rate):</strong> ${data.qber} <br>
-          <strong>Eavesdropping detected:</strong> ${data.eavesdropping_detected ? 'Yes' : 'No'}
-        `;
-        document.getElementById('summary').innerHTML = summary;
+        // Summary Cards
+        const summaryContainer = document.getElementById('summaryCards');
+        const summaryItems = [
+          { title: 'Total Bits', value: data.total_bits },
+          { title: 'Sifted Key Length', value: data.sifted_key_length },
+          { title: 'QBER', value: data.qber },
+          { title: 'Eavesdropping Detected', value: data.eavesdropping_detected ? 'Yes' : 'No' }
+        ];
+        summaryContainer.innerHTML = '';
+        summaryItems.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'summary-card';
+          card.innerHTML = `<h3>${item.title}</h3><p>${item.value}</p>`;
+          summaryContainer.appendChild(card);
+        });
 
         // Explanation
         const explanation = `
@@ -75,35 +147,34 @@
           data: {
             labels: data.alice_bits.map((_, i) => i + 1),
             datasets: [
-              { label: 'Alice', data: data.alice_bits, backgroundColor: 'blue' },
+              { label: 'Alice', data: data.alice_bits, backgroundColor: '#3498db' },
               { label: 'Bob', data: data.bob_results, 
-                backgroundColor: data.bob_results.map((b,i)=>b===data.alice_bits[i]?'green':'orange') }
+                backgroundColor: data.bob_results.map((b,i)=>data.sifted_key_indices.includes(i)?'#27ae60':'#e67e22')
+              }
             ]
           },
           options: {
             responsive: true,
             plugins: {
+              legend: { position: 'top' },
               tooltip: {
-                callbacks: {
-                  label: ctx => `${ctx.dataset.label}: ${ctx.raw}`
-                }
+                callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}` }
               }
             },
             scales: { y: { beginAtZero: true, max: 1 } }
           }
         });
 
-        // Table with reason for each bit
+        // Table
         const tbody = document.querySelector('#bitsTable tbody');
         tbody.innerHTML = '';
         for(let i=0; i<data.total_bits; i++){
           let reason = '';
           let siftedCell = '';
           let rowClass = '';
-
-          if(data.alice_bases[i] === data.bob_bases[i]){
+          if(data.sifted_key_indices.includes(i)){
             reason = 'Bases match → accepted';
-            siftedCell = data.bob_results[i];
+            siftedCell = data.alice_bits[i];
             rowClass = 'sifted';
           } else {
             reason = 'Bases mismatch → rejected';
@@ -115,7 +186,7 @@
           tr.innerHTML = `
             <td>${i+1}</td>
             <td class="alice">${data.alice_bits[i]}</td>
-            <td class="${data.bob_results[i]===data.alice_bits[i]?'bob':'error'}">${data.bob_results[i]}</td>
+            <td class="${data.sifted_key_indices.includes(i)?'bob':'error'}">${data.bob_results[i]}</td>
             <td>${reason}</td>
             <td>${siftedCell}</td>
           `;
