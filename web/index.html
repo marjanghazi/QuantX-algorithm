@@ -8,30 +8,49 @@
     body { font-family: Arial, sans-serif; margin: 20px; }
     #summary { margin-bottom: 20px; }
     .explanation { margin-top: 20px; background: #f9f9f9; padding: 15px; border-radius: 5px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
+    th { background-color: #eee; }
     .alice { color: blue; font-weight: bold; }
     .bob { color: green; font-weight: bold; }
     .error { color: orange; font-weight: bold; }
-    .eve { color: red; font-weight: bold; }
+    .sifted { background-color: #d1ffd1; font-weight: bold; } /* highlight sifted key bits */
+    .rejected { background-color: #ffd1d1; font-style: italic; } /* rejected bits */
   </style>
 </head>
 <body>
   <h2>BB84 Quantum Key Distribution Visualization</h2>
   
-  <!-- Summary of the simulation -->
+  <!-- Summary -->
   <p id="summary"></p>
   
-  <!-- Chart for bits -->
+  <!-- Chart -->
   <canvas id="bb84Chart" width="900" height="400"></canvas>
   
-  <!-- Explanations for users -->
+  <!-- Explanation -->
   <div class="explanation" id="explanation"></div>
+
+  <!-- Table -->
+  <h3>Bits Table</h3>
+  <table id="bitsTable">
+    <thead>
+      <tr>
+        <th>Index</th>
+        <th>Alice</th>
+        <th>Bob</th>
+        <th>Reason</th>
+        <th>Sifted Key</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
   <script>
     fetch('http://127.0.0.1:8000/simulate')
       .then(res => res.json())
       .then(data => {
-        
-        // Show simulation summary
+
+        // Summary
         const summary = `
           <strong>Total bits generated:</strong> ${data.total_bits} <br>
           <strong>Sifted key length:</strong> ${data.sifted_key_length} <br>
@@ -40,17 +59,16 @@
         `;
         document.getElementById('summary').innerHTML = summary;
 
-        // Add explanation text for each participant
+        // Explanation
         const explanation = `
-          <p><span class="alice">Alice</span> generates random bits and chooses random bases (+ or ×) for each bit.</p>
-          <p><span class="bob">Bob</span> chooses random bases to measure the received photons. If Bob's basis matches Alice's, he gets the correct bit (green). If not, the measurement is random (orange).</p>
-          <p><span class="eve">Eve</span> may try to eavesdrop. If present, her bits are shown in red. Mismatches caused by eavesdropping increase QBER.</p>
-          <p>The <strong>sifted key</strong> is created by keeping only the bits where Alice's and Bob's bases matched.</p>
-          <p>QBER tells us how many bits were altered due to noise or eavesdropping. If QBER > 11%, eavesdropping is detected.</p>
+          <p><span class="alice">Alice</span> generates random bits and chooses random bases (+ or ×).</p>
+          <p><span class="bob">Bob</span> measures each photon using a random basis. Correct measurements are green, mismatches are orange.</p>
+          <p>The <strong>sifted key</strong> is formed by keeping only the bits where Alice's and Bob's bases matched (highlighted in green). Rejected bits are highlighted in red with the reason.</p>
+          <p>QBER tells how many bits were altered. If QBER &gt; 11%, eavesdropping is suspected.</p>
         `;
         document.getElementById('explanation').innerHTML = explanation;
 
-        // Prepare chart
+        // Chart
         const ctx = document.getElementById('bb84Chart').getContext('2d');
         new Chart(ctx, {
           type: 'bar',
@@ -58,8 +76,8 @@
             labels: data.alice_bits.map((_, i) => i + 1),
             datasets: [
               { label: 'Alice', data: data.alice_bits, backgroundColor: 'blue' },
-              { label: 'Bob', data: data.bob_results, backgroundColor: data.bob_results.map((b, i) => b === data.alice_bits[i] ? 'green' : 'orange') },
-              { label: 'Eve', data: data.eve_bits || Array(data.total_bits).fill(0), backgroundColor: 'red' }
+              { label: 'Bob', data: data.bob_results, 
+                backgroundColor: data.bob_results.map((b,i)=>b===data.alice_bits[i]?'green':'orange') }
             ]
           },
           options: {
@@ -67,16 +85,42 @@
             plugins: {
               tooltip: {
                 callbacks: {
-                  label: function(context) {
-                    const labelMap = {0: '0', 1: '1'};
-                    return `${context.dataset.label}: ${labelMap[context.raw]}`;
-                  }
+                  label: ctx => `${ctx.dataset.label}: ${ctx.raw}`
                 }
               }
             },
             scales: { y: { beginAtZero: true, max: 1 } }
           }
         });
+
+        // Table with reason for each bit
+        const tbody = document.querySelector('#bitsTable tbody');
+        tbody.innerHTML = '';
+        for(let i=0; i<data.total_bits; i++){
+          let reason = '';
+          let siftedCell = '';
+          let rowClass = '';
+
+          if(data.alice_bases[i] === data.bob_bases[i]){
+            reason = 'Bases match → accepted';
+            siftedCell = data.bob_results[i];
+            rowClass = 'sifted';
+          } else {
+            reason = 'Bases mismatch → rejected';
+            rowClass = 'rejected';
+          }
+
+          const tr = document.createElement('tr');
+          tr.className = rowClass;
+          tr.innerHTML = `
+            <td>${i+1}</td>
+            <td class="alice">${data.alice_bits[i]}</td>
+            <td class="${data.bob_results[i]===data.alice_bits[i]?'bob':'error'}">${data.bob_results[i]}</td>
+            <td>${reason}</td>
+            <td>${siftedCell}</td>
+          `;
+          tbody.appendChild(tr);
+        }
       });
   </script>
 </body>
