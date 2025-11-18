@@ -12,7 +12,7 @@
       color: #333;
     }
     h2 { text-align: center; color: #2c3e50; }
-    
+
     /* Summary Cards */
     .summary-container {
       display: flex;
@@ -28,7 +28,10 @@
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       text-align: center;
+      transition: transform 0.2s;
+      cursor: default;
     }
+    .summary-card:hover { transform: translateY(-5px); }
     .summary-card h3 { margin: 0 0 10px; font-size: 18px; color: #2980b9; }
     .summary-card p { font-size: 16px; font-weight: bold; }
 
@@ -42,6 +45,38 @@
       line-height: 1.6;
     }
 
+    /* Diagram */
+    .diagram { margin-top:30px; text-align:center; }
+    .diagram h3 { margin-bottom:20px; color:#2c3e50; }
+    .diagram-flex { display:flex; justify-content:center; align-items:center; gap:40px; flex-wrap: wrap; position: relative; }
+    .diagram-box { padding:15px 25px; border-radius:10px; color:#fff; font-weight:bold; position: relative; }
+    .alice-box { background:#3498db; }
+    .bob-box { background:#27ae60; }
+    .channel-box { background:#8e44ad; }
+    .eve-box { background:#e74c3c; }
+    .key-box { background:#f1c40f; color:#333; }
+
+    /* Arrows */
+    .arrow {
+      width: 50px;
+      height: 2px;
+      background: #2c3e50;
+      position: relative;
+      display:inline-block;
+      margin:0 10px;
+    }
+    .arrow::after {
+      content: '';
+      width: 0; 
+      height: 0; 
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 8px solid #2c3e50;
+      position: absolute;
+      top: -4px;
+      right: -8px;
+    }
+
     /* Chart Card */
     #chartCard {
       margin-top: 30px;
@@ -52,7 +87,7 @@
     }
 
     /* Table Styles */
-    h3 { margin-top: 40px; text-align: center; color: #2c3e50; }
+    h3.table-title { margin-top: 40px; text-align: center; color: #2c3e50; }
     table { 
       border-collapse: collapse; 
       width: 100%; 
@@ -69,7 +104,7 @@
     }
     th { background-color: #2980b9; color: #fff; }
     tr:hover { background-color: #f1f1f1; }
-    
+
     .alice { color: #3498db; font-weight: bold; }
     .bob { color: #27ae60; font-weight: bold; }
     .error { color: #e67e22; font-weight: bold; }
@@ -78,6 +113,8 @@
 
     @media(max-width: 768px){
       .summary-container { flex-direction: column; }
+      .diagram-flex { flex-direction: column; gap:20px; }
+      .arrow { transform: rotate(90deg); margin:10px 0; }
     }
   </style>
 </head>
@@ -90,13 +127,29 @@
   <!-- Explanation -->
   <div class="explanation" id="explanation"></div>
 
+  <!-- Quantum Key Flow Diagram -->
+  <div class="diagram">
+    <h3>Quantum Key Distribution Flow</h3>
+    <div class="diagram-flex">
+      <div class="diagram-box alice-box" title="Alice generates random bits and bases">Alice<br>Bits & Bases</div>
+      <span class="arrow"></span>
+      <div class="diagram-box channel-box" title="Photons transmitted over quantum channel">Quantum Channel</div>
+      <span class="arrow"></span>
+      <div class="diagram-box eve-box" title="Eve can intercept, causing errors">Eve (Optional)</div>
+      <span class="arrow"></span>
+      <div class="diagram-box bob-box" title="Bob measures photons with random basis">Bob</div>
+      <span class="arrow"></span>
+      <div class="diagram-box key-box" title="Sifted key after matching bases">Sifted Key</div>
+    </div>
+  </div>
+
   <!-- Chart Card -->
   <div id="chartCard">
     <canvas id="bb84Chart" width="900" height="400"></canvas>
   </div>
 
   <!-- Table -->
-  <h3>Bits Table</h3>
+  <h3 class="table-title">Bits Table</h3>
   <table id="bitsTable">
     <thead>
       <tr>
