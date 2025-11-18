@@ -1,10 +1,31 @@
+from .core.qkd_engine import run_bb84
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
 from app.api.routes import router
 
 app = FastAPI(
     title="QuantX Secure Communication Backend",
     version="0.1.0"
 )
+# Allow frontend (web) to access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/simulate")
+def simulate():
+    try:
+        # Use 'n' instead of 'total_bits'
+        result = run_bb84(n=50)
+        return JSONResponse(content=result)
+    except Exception as e:
+        return {"error": str(e)}
+
 
 # Attach API routes
 app.include_router(router)

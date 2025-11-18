@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BB84 Visualization</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #summary { margin-bottom: 20px; }
+    .explanation { margin-top: 20px; background: #f9f9f9; padding: 15px; border-radius: 5px; }
+    .alice { color: blue; font-weight: bold; }
+    .bob { color: green; font-weight: bold; }
+    .error { color: orange; font-weight: bold; }
+    .eve { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>BB84 Quantum Key Distribution Visualization</h2>
+  
+  <!-- Summary of the simulation -->
+  <p id="summary"></p>
+  
+  <!-- Chart for bits -->
+  <canvas id="bb84Chart" width="900" height="400"></canvas>
+  
+  <!-- Explanations for users -->
+  <div class="explanation" id="explanation"></div>
+
+  <script>
+    fetch('http://127.0.0.1:8000/simulate')
+      .then(res => res.json())
+      .then(data => {
+        
+        // Show simulation summary
+        const summary = `
+          <strong>Total bits generated:</strong> ${data.total_bits} <br>
+          <strong>Sifted key length:</strong> ${data.sifted_key_length} <br>
+          <strong>QBER (Quantum Bit Error Rate):</strong> ${data.qber} <br>
+          <strong>Eavesdropping detected:</strong> ${data.eavesdropping_detected ? 'Yes' : 'No'}
+        `;
+        document.getElementById('summary').innerHTML = summary;
+
+        // Add explanation text for each participant
+        const explanation = `
+          <p><span class="alice">Alice</span> generates random bits and chooses random bases (+ or ×) for each bit.</p>
+          <p><span class="bob">Bob</span> chooses random bases to measure the received photons. If Bob's basis matches Alice's, he gets the correct bit (green). If not, the measurement is random (orange).</p>
+          <p><span class="eve">Eve</span> may try to eavesdrop. If present, her bits are shown in red. Mismatches caused by eavesdropping increase QBER.</p>
+          <p>The <strong>sifted key</strong> is created by keeping only the bits where Alice's and Bob's bases matched.</p>
+          <p>QBER tells us how many bits were altered due to noise or eavesdropping. If QBER > 11%, eavesdropping is detected.</p>
+        `;
+        document.getElementById('explanation').innerHTML = explanation;
+
+        // Prepare chart
+        const ctx = document.getElementById('bb84Chart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: data.alice_bits.map((_, i) => i + 1),
+            datasets: [
+              { label: 'Alice', data: data.alice_bits, backgroundColor: 'blue' },
+              { label: 'Bob', data: data.bob_results, backgroundColor: data.bob_results.map((b, i) => b === data.alice_bits[i] ? 'green' : 'orange') },
+              { label: 'Eve', data: data.eve_bits || Array(data.total_bits).fill(0), backgroundColor: 'red' }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const labelMap = {0: '0', 1: '1'};
+                    return `${context.dataset.label}: ${labelMap[context.raw]}`;
+                  }
+                }
+              }
+            },
+            scales: { y: { beginAtZero: true, max: 1 } }
+          }
+        });
+      });
+  </script>
+</body>
+</html>
